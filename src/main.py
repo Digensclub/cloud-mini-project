@@ -1,19 +1,24 @@
 from fastapi import FastAPI
 import uvicorn
-import redis
+from src.resources.redis_resource import RedisResource
+from src.resources.prometheus_resource import PrometheusResource
 
 # Initialize FastAPI app
 app = FastAPI()
 
-# Connect to Redis (global client)
-r = redis.Redis(host="localhost", port=6379, db=0)
+# Initialize resources
+redis_resource = RedisResource()
+r = redis_resource.connect()
+
+prometheus_resource = PrometheusResource(app)
+prometheus_resource.connect()
 
 @app.get("/")
 def read_root():
     # Increment a counter in Redis
     r.incr("hits")
     return {
-        "message": "Hello, World",
+        "message": "Hello, World from FastAPI with Redis and Prometheus!",
         "hits": int(r.get("hits"))
     }
 
